@@ -33,8 +33,9 @@ function getArgs() {
 }
 const args = getArgs();
 
+// Override defaults if supplied as arguments
 var installer_version = '1.1';
-var base_dir = '/opt/cronicle';
+var base_dir = (typeof args["basedir"] !== "undefined" && args["basedir"]) ? args["basedir"] : '/opt/cronicle';
 var log_dir = base_dir + '/logs';
 var log_file = '';
 var gh_repo_url = 'http://github.com/jhuckaby/Cronicle';
@@ -67,8 +68,14 @@ if (process.getuid() != 0) {
 }
 
 // create base and log directories
-try { cp.execSync( "mkdir -p " + base_dir + " && chmod 775 " + base_dir ); }
-catch (err) { die("Failed to create base directory: " + base_dir + ": " + err); }
+try {
+	print(`Creating base directory: ${base_dir}`)
+	cp.execSync(`mkdir -p ${base_dir} && chmod 775 ${base_dir}`, {stdio: 'ignore'});
+	print(" ..ok\n")
+} catch (err) {
+	print("..fail\n");
+	die(`Failed to create base directory: ${base_dir}. Please run installer as sudo or choose another base directory.`);
+}
 
 try { cp.execSync( "mkdir -p " + log_dir + " && chmod 777 " + log_dir ); }
 catch (err) { die("Failed to create log directory: " + log_dir + ": " + err); }
